@@ -32,6 +32,8 @@ struct SettingsScreen: View {
         Form {
             switch popover.settingsTab {
             case .general: generalTab
+            // The Settings window shows the accounts screen for this tab, never this form.
+            case .accounts: EmptyView()
             case .display: displayTab
             case .alerts: alertsTab
             case .advanced: advancedTab
@@ -78,7 +80,8 @@ struct SettingsScreen: View {
                 .onChange(of: appearance) { AppearanceSetting.applyCurrent() }
             picker("Time Format", selection: $timeFormat, options: TimeFormatSetting.allCases.map { ($0, $0.label) })
         }
-        updatesSection
+        // Only a build with an update feed can update itself; Headroom releases ship without one.
+        if updater.isActive { updatesSection }
     }
 
     @ViewBuilder
@@ -184,7 +187,7 @@ struct SettingsScreen: View {
             openURL(URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(Bundle.main.bundleIdentifier!)")!)
             (NSApp.keyWindow as? MenuBarPanel)?.onDismiss?()
         } label: {
-            Text("Notifications are off for OpenUsage in \(Text("System Settings").foregroundColor(.accentColor)).")
+            Text("Notifications are off for Headroom in \(Text("System Settings").foregroundColor(.accentColor)).")
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.notice)
                 .contentShape(Rectangle())
@@ -202,12 +205,6 @@ struct SettingsScreen: View {
             Toggle(isOn: $hideFromScreenShare.isEnabled) {
                 titled("Privacy Mode", info: "Hide usage and account names from screenshots and recordings")
             }
-            Toggle(isOn: Binding(
-                get: { container.telemetry.isEnabled },
-                set: { container.telemetry.setEnabled($0) }
-            )) {
-                titled("Help Make OpenUsage Better", info: "Share additional anonymous usage stats that tell the team where to improve.")
-            }
         } header: {
             Text("Privacy")
         }
@@ -223,24 +220,24 @@ struct SettingsScreen: View {
                         .foregroundStyle(.secondary)
                 }
             } label: {
-                titled("Terminal Helper", info: "Adds a global openusage command that prints the usage the app last fetched.")
+                titled("Terminal Helper", info: "Adds a global headroom command that prints the usage the app last fetched.")
             }
         } header: {
             Text("Command Line")
         } footer: {
             if commandLineTool.status == .conflict {
-                SettingsNote("\(commandLineTool.destinationPath) already exists and wasn't installed by OpenUsage.")
+                SettingsNote("\(commandLineTool.destinationPath) already exists and wasn't installed by Headroom.")
             } else if let errorMessage = commandLineTool.errorMessage {
                 SettingsNote(errorMessage)
             } else if case .linkedToAnotherCopy = commandLineTool.status {
-                SettingsNote("\(commandLineTool.destinationPath) points at another copy of OpenUsage. Install points it at this one.")
+                SettingsNote("\(commandLineTool.destinationPath) points at another copy of Headroom. Install points it at this one.")
             }
         }
         Section {
             Picker(selection: $logLevel) {
                 ForEach(LogLevelSetting.allCases, id: \.self) { Text($0.label).tag($0) }
             } label: {
-                titled("Log Level", info: "How much detail OpenUsage writes to the macOS log. Choose Debug while you reproduce a problem.")
+                titled("Log Level", info: "How much detail Headroom writes to the macOS log. Choose Debug while you reproduce a problem.")
             }
         } header: {
             Text("Debug")

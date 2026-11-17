@@ -100,7 +100,7 @@ struct PopoverTopBar: View {
     }
 }
 
-private struct SettingsTabBar: View {
+struct SettingsTabBar: View {
     @Environment(PopoverState.self) private var popover
     @Environment(\.reduceAnimations) private var reduceAnimations
 
@@ -113,7 +113,7 @@ private struct SettingsTabBar: View {
     private func tab(for tab: SettingsTab) -> some View {
         let isSelected = popover.settingsTab == tab
         return Button {
-            popover.settingsTab = tab
+            popover.selectSettingsTab(tab)
         } label: {
             VStack(spacing: 2) {
                 Image(systemName: tab.symbol)

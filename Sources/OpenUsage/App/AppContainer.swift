@@ -142,7 +142,7 @@ final class AppContainer {
             try Task.checkCancellation()
             guard let index = providers.firstIndex(where: { $0.provider.id == providerID }) else { return }
             guard providers[index] === runtime else {
-                throw ProviderError.unavailable("This account’s sign-in changed while OpenUsage was checking it. Try again.")
+                throw ProviderError.unavailable("This account’s sign-in changed while Headroom was checking it. Try again.")
             }
             // A read can renew the sign-in, so what's saved is what the read ended on.
             try accounts.replaceCredential(provisional.load(account.id) ?? credential, for: account.id)

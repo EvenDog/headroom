@@ -14,7 +14,7 @@ struct UpdateBannerCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Update Available")
                     .font(.subheadline.weight(.semibold))
-                Text("OpenUsage \(version) is ready to download.")
+                Text("Headroom \(version) is ready to download.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

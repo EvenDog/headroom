@@ -95,22 +95,25 @@ struct PopoverFooter: View {
 
             Divider()
 
-            Button { updater.checkForUpdates() } label: {
-                Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
+            // Only a build with an update feed can update itself; Headroom releases ship without one.
+            if updater.isActive {
+                Button { updater.checkForUpdates() } label: {
+                    Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .disabled(!updater.canCheckForUpdates)
+
+                Divider()
             }
-            .disabled(!updater.canCheckForUpdates)
 
-            Divider()
-
-            Link(destination: URL(string: "https://github.com/robinebers/openusage/issues/new/choose")!) {
+            Link(destination: URL(string: "https://github.com/EvenDog/openusage/issues/new")!) {
                 Label("Report an Issue…", systemImage: "ladybug")
             }
 
             Button { AboutPanel.present() } label: {
-                Label("About OpenUsage", systemImage: "info.circle")
+                Label("About Headroom", systemImage: "info.circle")
             }
             Button(role: .destructive) { NSApplication.shared.terminate(nil) } label: {
-                Label("Quit OpenUsage", systemImage: "power")
+                Label("Quit Headroom", systemImage: "power")
             }
             .keyboardShortcut("q")
         } label: {
@@ -139,7 +142,7 @@ struct PopoverFooter: View {
     /// The version over the refresh countdown, as 0.7 showed them.
     private var footerIdentity: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("OpenUsage \(AppInfo.version)")
+            Text("Headroom \(AppInfo.version)")
             if !layout.displayGroups.isEmpty { nextUpdateButton }
         }
         .font(.caption2)

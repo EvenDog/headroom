@@ -18,7 +18,7 @@ struct CLIProxyHubClient: Sendable {
             return try HubLogin.listing(from: response.body)
         } catch {
             AppLog.error(LogTag.auth("cliproxy"), "\(CLIProxyHub.host(of: url)) sent a login listing OpenUsage can't read")
-            throw ProviderError.unavailable("The CLIProxyAPI hub at \(CLIProxyHub.host(of: url)) sent a login list OpenUsage can't read.")
+            throw ProviderError.unavailable("The CLIProxyAPI hub at \(CLIProxyHub.host(of: url)) sent a login list Headroom can't read.")
         }
     }
 
@@ -90,7 +90,7 @@ struct CLIProxyHubClient: Sendable {
         let host = CLIProxyHub.host(of: url)
         guard CLIProxyHub.allowsKey(at: url) else {
             AppLog.error(LogTag.auth("cliproxy"), "\(host) is plain http outside this Mac, the local network, and Tailscale; not sending the management key")
-            throw ProviderError.unavailable("Use https for \(host). OpenUsage uses http only for a hub on this Mac, your local network, or Tailscale.")
+            throw ProviderError.unavailable("Use https for \(host). Headroom uses http only for a hub on this Mac, your local network, or Tailscale.")
         }
         let response: HTTPResponse
         do {
@@ -118,7 +118,7 @@ struct CLIProxyHubClient: Sendable {
         if pathReason == nw_path_unsatisfied_reason_local_network_denied {
             AppLog.warn(LogTag.auth("cliproxy"), "\(host) \(path) unreachable: macOS denied OpenUsage Local Network access")
             return .unreachable(
-                "macOS is keeping OpenUsage from the CLIProxyAPI hub at \(host). Allow OpenUsage under System Settings → Privacy & Security → Local Network.",
+                "macOS is keeping Headroom from the CLIProxyAPI hub at \(host). Allow Headroom under System Settings → Privacy & Security → Local Network.",
                 offline: true
             )
         }

@@ -45,3 +45,11 @@ final class PostHogTelemetrySink: TelemetrySink {
         PostHogSDK.shared.flush()
     }
 }
+
+/// Sends nothing anywhere. Headroom uses this in place of `PostHogTelemetrySink`, whose project key belongs
+/// to the original OpenUsage: a fork must not report its users' analytics or crashes to someone else's account.
+@MainActor
+final class NoTelemetrySink: TelemetrySink {
+    func capture(_ event: String, _ properties: [String: Any]) {}
+    func flush() {}
+}

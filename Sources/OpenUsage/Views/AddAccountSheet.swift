@@ -9,6 +9,17 @@ struct AddAccountSheet: View {
         _flow = State(initialValue: flow)
     }
 
+    /// The sheet wired to the app's stores. It signs in again to the account `popover` names, if any,
+    /// instead of adding a new one. Shared by the panel and the Settings window.
+    init(container: AppContainer, popover: PopoverState) {
+        self.init(flow: AddAccountFlow(
+            store: container.accounts,
+            connectHub: { url, key in try await container.hubs.connect(url: url, key: key) },
+            replaceCredential: { credential, id in try await container.signInAgain(credential, for: id) },
+            signingInAgainTo: popover.signingInAgainProviderID.flatMap(container.accounts.account(cardID:))
+        ))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if flow.isConnectingHub {

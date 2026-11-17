@@ -1,7 +1,12 @@
 # Settings
 
-Open Settings from the panel's **⋯** menu or press **⌘,**. It has four tabs: General, Display,
-Alerts, and Advanced. Changes apply at once. Hover the ⓘ beside a setting to see what it does.
+Open Settings from the panel's **⋯** menu, the menu bar icon's right-click menu, or press **⌘,**. It
+opens in its own window, which closes the panel. It has five tabs: General, Accounts, Display, Alerts,
+and Advanced. Changes apply at once. Hover the ⓘ beside a setting to see what it does.
+
+## Accounts
+
+The [Accounts](accounts.md) screen: add, edit, rename, reorder, and remove accounts.
 
 ## General
 

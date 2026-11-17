@@ -37,7 +37,7 @@ struct DashboardContentView: View {
     @ViewBuilder
     private var widgetContent: some View {
         if layout.registry.providers.isEmpty {
-            EmptyDashboardView { popover.isAddingAccount = true }
+            EmptyDashboardView { popover.addAccount() }
         } else if layout.displayGroups.isEmpty {
             Text("Every metric is hidden. Turn them back on in Accounts.")
                 .font(.system(size: 12))

@@ -122,7 +122,7 @@ final class LoopbackCallbackServer: @unchecked Sendable {
 
     private func reply(_ connection: NWConnection, status: Int, body: String, result: Result<String, Error>? = nil) {
         if let result { finish(result) }
-        let bodyData = Data("<!doctype html><title>OpenUsage</title><p>\(body)</p>".utf8)
+        let bodyData = Data("<!doctype html><title>Headroom</title><p>\(body)</p>".utf8)
         let response = Data(
             "HTTP/1.1 \(status) \(status == 200 ? "OK" : "Error")\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: \(bodyData.count)\r\nConnection: close\r\n\r\n".utf8
         ) + bodyData

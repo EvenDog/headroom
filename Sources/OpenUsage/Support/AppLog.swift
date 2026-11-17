@@ -43,7 +43,7 @@ enum AppLog {
     private nonisolated(unsafe) static var loggers: [String: Logger] = [:]
 
     static func bootstrap() {
-        info(.config, "OpenUsage \(AppInfo.version) starting")
+        info(.config, "Headroom \(AppInfo.version) starting")
     }
 
     static func error(_ tag: String, _ message: @autoclosure () -> String) { emit(.error, tag, message) }
@@ -70,7 +70,7 @@ enum AppLog {
         loggerLock.lock()
         defer { loggerLock.unlock() }
         if let existing = loggers[tag] { return existing }
-        let logger = Logger(subsystem: "OpenUsage", category: tag)
+        let logger = Logger(subsystem: "Headroom", category: tag)
         loggers[tag] = logger
         return logger
     }

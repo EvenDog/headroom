@@ -130,6 +130,7 @@ final class CommandLineToolInstallerTests: XCTestCase {
         XCTAssertTrue(CommandLineToolInstaller.isOpenUsageHelper("/Applications/OpenUsage.app/Contents/Helpers/openusage"))
         XCTAssertTrue(CommandLineToolInstaller.isOpenUsageHelper("/Users/me/Dev/openusage/dist/OpenUsage.app/Contents/Helpers/openusage"))
         XCTAssertTrue(CommandLineToolInstaller.isOpenUsageHelper("/Applications/OpenUsage Beta.app/Contents/Helpers/openusage"))
+        XCTAssertTrue(CommandLineToolInstaller.isOpenUsageHelper("/Applications/Headroom.app/Contents/Helpers/openusage"))
         XCTAssertFalse(CommandLineToolInstaller.isOpenUsageHelper("/Applications/OpenUsage.app/Contents/MacOS/openusage"))
         XCTAssertFalse(CommandLineToolInstaller.isOpenUsageHelper("/Applications/Usage.app/Contents/Helpers/openusage"))
         XCTAssertFalse(CommandLineToolInstaller.isOpenUsageHelper("/opt/homebrew/bin/openusage"))

@@ -291,7 +291,7 @@ final class CLIProxyHubTunnelTests: XCTestCase {
         let denied = classify(nw_path_unsatisfied_reason_local_network_denied)
         XCTAssertEqual(
             denied.localizedDescription,
-            "macOS is keeping OpenUsage from the CLIProxyAPI hub at mini.local:8317. Allow OpenUsage under System Settings → Privacy & Security → Local Network."
+            "macOS is keeping Headroom from the CLIProxyAPI hub at mini.local:8317. Allow Headroom under System Settings → Privacy & Security → Local Network."
         )
         XCTAssertEqual(RefreshFailure(error: denied).kind, .offline, "retried like any read that never left the Mac")
 

@@ -1,29 +1,28 @@
-# OpenUsage
+# Headroom
+
+> **Headroom is an unofficial fork of [OpenUsage](https://github.com/robinebers/openusage) by Robin
+> Ebers.** It is not affiliated with or endorsed by OpenUsage. "OpenUsage" is a trademark of Robin
+> Ebers; see [TRADEMARK.md](TRADEMARK.md).
 
 Track your AI coding subscriptions from the macOS menu bar.
 
-OpenUsage shows how much of each AI plan you've used: session and weekly limits, credits, and
-balances, all in one panel. The limits closest to running out sit right in the menu bar.
+Headroom shows how much of each AI plan you've used: session and weekly limits, credits, and
+balances, all in one panel.
 
-| | Light | Dark |
-| --- | --- | --- |
-| **Priority** | <img src="assets/priority-light.jpg" alt="OpenUsage Priority tab in light mode, with pinned limits, limits running out, and a used-up limit" width="400"> | <img src="assets/priority-dark.jpg" alt="OpenUsage Priority tab in dark mode, with pinned limits, limits running out, and a used-up limit" width="400"> |
-| **All Usage** | <img src="assets/all-usage-light.jpg" alt="OpenUsage All Usage tab in light mode, with Claude, ChatGPT, and Cursor usage" width="400"> | <img src="assets/all-usage-dark.jpg" alt="OpenUsage All Usage tab in dark mode, with Claude, ChatGPT, and Cursor usage" width="400"> |
+What this fork adds:
+
+- **Stacked menu bar bars.** Pick up to three limits in Settings → Display → Menu Bar Bars and see
+  them as thin bars stacked in the menu bar.
+- **A Settings window.** Settings and account management open in their own window, with an
+  Accounts tab, instead of inside the menu bar panel.
+- **No analytics and no auto-updates.** Headroom sends nothing to the original project's analytics
+  and never checks its update feed.
 
 ## Installation
 
-- **Homebrew:**
-
-  ```sh
-  brew install --cask openusage
-  ```
-
-- **Direct download:** grab the latest universal DMG from the
-  [releases page](https://github.com/robinebers/openusage/releases/latest), open it, and drag
-  OpenUsage to your Applications folder.
-
-The app updates itself with signed, notarized [Sparkle](docs/updates.md) updates. Requires macOS 15
-(Sequoia) or later, on Apple Silicon or Intel.
+Download the DMG from this fork's releases, open it, and drag Headroom to your Applications folder.
+To update, download and install a newer DMG. Requires macOS 15 (Sequoia) or later, on Apple Silicon
+or Intel.
 
 ## Supported Providers
 

@@ -1,7 +1,9 @@
 # Accounts
 
-The Accounts screen lists your accounts. Open it from the panel's **⋯** menu or press Return
-on the dashboard.
+The Accounts screen lists your accounts. It's the Accounts tab of the [Settings](settings.md) window.
+Open it from the panel's **⋯** menu, press Return on the dashboard, or choose **Manage Accounts…** or
+**Edit Account…** from a right-click menu on the dashboard. Each opens the Settings window and closes
+the panel.
 
 ## Add an account
 

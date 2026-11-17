@@ -8,7 +8,7 @@ import SwiftUI
 struct MenuBarBarStack: View {
     let content: MenuBarContent
 
-    static let barWidth: CGFloat = 28
+    static let barWidth: CGFloat = 16.5
     static let barHeight: CGFloat = 4
     static let barGap: CGFloat = 2
     /// How visible the empty part of a bar is, so you can see where 100% is.

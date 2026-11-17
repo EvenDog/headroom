@@ -15,9 +15,10 @@ final class DisplaySettingsTests: QuietWindowTestCase {
         super.tearDown()
     }
 
-    func testGeneralEndsWithAppearanceThenUpdates() async throws {
+    /// Updates shows only in a build with an update feed, which tests and Headroom releases don't have.
+    func testGeneralEndsWithAppearance() async throws {
         try await assertHeadingsAndPickers(.general, [
-            DashboardTab.priority.label, "Appearance", AppearanceSetting.system.label, TimeFormatSetting.auto.label, "Updates",
+            DashboardTab.priority.label, "Appearance", AppearanceSetting.system.label, TimeFormatSetting.auto.label,
         ])
     }
 
@@ -48,8 +49,8 @@ final class DisplaySettingsTests: QuietWindowTestCase {
 
     func testEachAdvancedRowExplainsItselfInAnInfoTooltipInsteadOfAFooterNote() async throws {
         try await assertExplainedByInfoIcons(.advanced, [
-            "Hide usage and account names from screenshots and recordings", "Share additional anonymous usage stats that tell the team where to improve.",
-            "Adds a global openusage command that prints the usage the app last fetched.", "How much detail OpenUsage writes to the macOS log. Choose Debug while you reproduce a problem.",
+            "Hide usage and account names from screenshots and recordings",
+            "Adds a global headroom command that prints the usage the app last fetched.", "How much detail Headroom writes to the macOS log. Choose Debug while you reproduce a problem.",
         ])
     }
 

@@ -3,8 +3,8 @@
 The strip shows the limits closest to running out, or with Always Show In Menu Bar everything
 Priority lists.
 
-- Left-click the icon to open the panel. Right-click (or control-click) it for **Settings** and
-  **Quit OpenUsage**.
+- Left-click the icon to open the panel. Right-click (or control-click) it for **Settings**, which
+  opens the Settings window, and **Quit OpenUsage**.
 - The strip shows the limits [running out](dashboard.md#priority), most urgent first, pinned or not,
   up to **Settings → Display → Menu Bar Icons → Max Items In Menu Bar** (3 by default).
 - With **Always Show In Menu Bar** on (off by default), it lists everything Priority does, in its

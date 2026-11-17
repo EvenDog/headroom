@@ -38,12 +38,7 @@ struct DashboardView: View {
             .coordinateSpace(name: Self.reorderSpace)
             .environment(\.concealsAccountNames, container.hideFromScreenShare.isConcealing)
             .sheet(isPresented: $popover.isAddingAccount, onDismiss: { popover.signingInAgainProviderID = nil }) {
-                AddAccountSheet(flow: AddAccountFlow(
-                    store: container.accounts,
-                    connectHub: { url, key in try await container.hubs.connect(url: url, key: key) },
-                    replaceCredential: { credential, id in try await container.signInAgain(credential, for: id) },
-                    signingInAgainTo: popover.signingInAgainProviderID.flatMap(container.accounts.account(cardID:))
-                ))
+                AddAccountSheet(container: container, popover: popover)
             }
             .background(
                 PopoverKeyReader { key in

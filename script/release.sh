@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Builds a distributable, Developer ID-signed, notarized OpenUsage.app and wraps it in a DMG. The app
-# is a universal binary (arm64 + x86_64) so it runs on both Apple Silicon and Intel Macs; the DMG is the
-# only output. The appcast is produced separately by Sparkle's generate_appcast (in release.yml), which
-# signs the DMG with the EdDSA key and writes/updates appcast.xml. Runs in CI (release.yml) and locally
-# on a Mac with the same env. This script does NOT push anything to GitHub.
+# Builds a distributable, Developer ID-signed, notarized Headroom.app (a fork of OpenUsage) and wraps it
+# in a DMG. The app is a universal binary (arm64 + x86_64) so it runs on both Apple Silicon and Intel
+# Macs; the DMG is the only output. Headroom ships without an update feed: it never checks for updates,
+# so a new version is installed by downloading a new DMG. This script does NOT push anything to GitHub.
+#
+# Example (signing identity from `security find-identity -v -p codesigning`):
+#   CODESIGN_IDENTITY="Developer ID Application: …" OPENUSAGE_VERSION=1.0.0 \
+#     NOTARY_KEYCHAIN_PROFILE=headroom-notary script/release.sh
 #
 # Required env:
 #   CODESIGN_IDENTITY     Developer ID Application identity (name or hash)
-#   SPARKLE_PUBLIC_KEY    base64 EdDSA public key -> baked into Info.plist (SUPublicEDKey). generate_appcast
-#                         only signs the DMG if this matches the private key it signs with.
-#   OPENUSAGE_VERSION     human version, e.g. 0.7.0 (CFBundleShortVersionString)
+#   OPENUSAGE_VERSION     human version, e.g. 1.0.0 (CFBundleShortVersionString)
 # Optional env:
 #   OPENUSAGE_BUILD       CFBundleVersion (monotonic). Default: script/build_number.sh for v$OPENUSAGE_VERSION
 #                         (the commit count, suffixed when an earlier release tag shipped this commit).
-#   FEED_URL              appcast URL baked into the app. Default: GitHub Pages project URL.
-#   NOTARY_APPLE_ID / NOTARY_APP_PASSWORD / NOTARY_TEAM_ID   Apple ID, app-specific password, and team
-#                         ID for notarytool. When all three are set, the app and DMG are notarized + stapled.
+#   NOTARY_KEYCHAIN_PROFILE  a login saved with `xcrun notarytool store-credentials <name>`. When set, the
+#                         app and DMG are notarized + stapled, and the password never appears here.
+#   NOTARY_APPLE_ID / NOTARY_APP_PASSWORD / NOTARY_TEAM_ID   the same login passed directly instead (CI).
 #   ALLOW_UNNOTARIZED=1   Skip notarization for a LOCAL dry run. Without it, missing notary creds is a
 #                         hard error so CI never publishes an un-notarized build.
 
@@ -25,11 +26,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 : "${CODESIGN_IDENTITY:?set CODESIGN_IDENTITY to your Developer ID Application identity}"
-: "${SPARKLE_PUBLIC_KEY:?set SPARKLE_PUBLIC_KEY to your base64 EdDSA public key}"
 : "${OPENUSAGE_VERSION:?set OPENUSAGE_VERSION, e.g. 0.7.0}"
 
-APP_NAME="OpenUsage"
-BUNDLE_ID="com.robinebers.openusage"
+APP_NAME="Headroom"
+BUNDLE_ID="com.evendog.headroom"
 MIN_SYSTEM_VERSION="15.0"
 VERSION="$OPENUSAGE_VERSION"
 # CFBundleShortVersionString carries the full version, including any pre-release suffix (e.g.
@@ -38,7 +38,6 @@ VERSION="$OPENUSAGE_VERSION"
 # monotonic build number below), not this string, and Developer ID notarization does not require it to
 # be numeric. (Sparkle's own docs use a beta short version, e.g. "2.0b1".)
 BUILD="${OPENUSAGE_BUILD:-$("$ROOT_DIR/script/build_number.sh" "v$VERSION")}"
-FEED_URL="${FEED_URL:-https://robinebers.github.io/openusage/appcast.xml}"
 DMG_NAME="$APP_NAME-$VERSION.dmg"
 
 DIST_DIR="$ROOT_DIR/dist"
@@ -59,19 +58,25 @@ APP_DSYM="$DSYM_DIR/$APP_NAME.app.dSYM"
 # opt out with ALLOW_UNNOTARIZED=1 (the build will then be Gatekeeper-blocked on other Macs). Missing
 # creds without that opt-out is a hard error so CI never publishes an un-notarized DMG.
 NOTARIZE=0
-if [ -n "${NOTARY_APPLE_ID:-}" ] && [ -n "${NOTARY_APP_PASSWORD:-}" ] && [ -n "${NOTARY_TEAM_ID:-}" ]; then
+if [ -n "${NOTARY_KEYCHAIN_PROFILE:-}" ]; then
+  NOTARIZE=1
+elif [ -n "${NOTARY_APPLE_ID:-}" ] && [ -n "${NOTARY_APP_PASSWORD:-}" ] && [ -n "${NOTARY_TEAM_ID:-}" ]; then
   NOTARIZE=1
 elif [ "${ALLOW_UNNOTARIZED:-}" = "1" ]; then
   echo "WARNING: ALLOW_UNNOTARIZED=1 — build will NOT be notarized (other Macs will block it)." >&2
 else
-  echo "Notarization creds missing (NOTARY_APPLE_ID / NOTARY_APP_PASSWORD / NOTARY_TEAM_ID)." >&2
+  echo "Notarization creds missing (NOTARY_KEYCHAIN_PROFILE, or NOTARY_APPLE_ID / NOTARY_APP_PASSWORD / NOTARY_TEAM_ID)." >&2
   echo "Set them, or set ALLOW_UNNOTARIZED=1 for a local dry run." >&2
   exit 1
 fi
 
 notarize() {  # $1: artifact to submit (.zip or .dmg)
-  xcrun notarytool submit "$1" \
-    --apple-id "$NOTARY_APPLE_ID" --password "$NOTARY_APP_PASSWORD" --team-id "$NOTARY_TEAM_ID" --wait
+  if [ -n "${NOTARY_KEYCHAIN_PROFILE:-}" ]; then
+    xcrun notarytool submit "$1" --keychain-profile "$NOTARY_KEYCHAIN_PROFILE" --wait
+  else
+    xcrun notarytool submit "$1" \
+      --apple-id "$NOTARY_APPLE_ID" --password "$NOTARY_APP_PASSWORD" --team-id "$NOTARY_TEAM_ID" --wait
+  fi
 }
 
 echo "==> building $APP_NAME $VERSION ($BUILD) — universal (arm64 + x86_64)"
@@ -84,7 +89,7 @@ echo "==> building $APP_NAME $VERSION ($BUILD) — universal (arm64 + x86_64)"
 swift build -c release --arch arm64 --arch x86_64 -Xswiftc -g --product OpenUsage
 swift build -c release --arch arm64 --arch x86_64 -Xswiftc -g --product openusage-cli
 BUILD_DIR="$(swift build -c release --arch arm64 --arch x86_64 -Xswiftc -g --show-bin-path)"
-BUILD_BINARY="$BUILD_DIR/$APP_NAME"
+BUILD_BINARY="$BUILD_DIR/OpenUsage"  # SwiftPM's product name; copied in as $APP_NAME
 BUILD_CLI_BINARY="$BUILD_DIR/openusage-cli"
 [ -x "$BUILD_BINARY" ] || { echo "missing built binary: $BUILD_BINARY" >&2; exit 1; }
 [ -x "$BUILD_CLI_BINARY" ] || { echo "missing built CLI: $BUILD_CLI_BINARY" >&2; exit 1; }
@@ -144,22 +149,9 @@ for bundle in "$BUILD_DIR"/*.bundle; do
 done
 shopt -u nullglob
 
-# Install the app icon. Prefer the prebuilt compiled catalog: actool on GitHub's runners (Xcode 26.4.1
-# and 26.5) crashes on the Icon Composer `.icon` refractivity feature (Apple regression FB20183399), so
-# CI can't compile it. The committed Assets.car is produced by a working actool via script/compile_icon.sh;
-# regenerate it there whenever assets/AppIcon.icon changes. Fall back to actool where it works (e.g. local).
-if [ -f "$ROOT_DIR/assets/AppIcon.prebuilt/Assets.car" ]; then
-  echo "==> installing prebuilt app icon"
-  cp "$ROOT_DIR/assets/AppIcon.prebuilt/Assets.car" "$APP_RESOURCES/Assets.car"
-  [ -f "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" ] \
-    && cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
-else
-  echo "==> compiling app icon"
-  xcrun actool "$ROOT_DIR/assets/AppIcon.icon" --compile "$APP_RESOURCES" \
-    --app-icon AppIcon --enable-on-demand-resources NO --development-region en \
-    --target-device mac --platform macosx --minimum-deployment-target "$MIN_SYSTEM_VERSION" \
-    --output-partial-info-plist /dev/null --output-format human-readable-text --errors --warnings
-fi
+# Install the Headroom app icon (assets/AppIcon.prebuilt/AppIcon.icns, drawn from assets/AppIcon.png).
+echo "==> installing app icon"
+cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
 
 cat >"$APP_CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -174,15 +166,10 @@ cat >"$APP_CONTENTS/Info.plist" <<PLIST
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$BUILD</string>
   <key>LSMinimumSystemVersion</key><string>$MIN_SYSTEM_VERSION</string>
-  <key>CFBundleIconName</key><string>AppIcon</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSUIElement</key><true/>
   <key>NSPrincipalClass</key><string>NSApplication</string>
   <key>NSHighResolutionCapable</key><true/>
-  <key>SUFeedURL</key><string>$FEED_URL</string>
-  <key>SUPublicEDKey</key><string>$SPARKLE_PUBLIC_KEY</string>
-  <key>SUEnableAutomaticChecks</key><true/>
-  <key>SUScheduledCheckInterval</key><integer>3600</integer>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSExceptionDomains</key>
@@ -208,16 +195,10 @@ codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" "$CLI
 codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" "$APP_BUNDLE"
 codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
 
-# Notarize + staple the app itself (not just the DMG) so it launches cleanly even offline after a
-# Sparkle update extracts it from the disk image.
-if [ "$NOTARIZE" = "1" ]; then
-  echo "==> notarizing app (this can take a few minutes)"
-  APP_ZIP="$DIST_DIR/$APP_NAME-notarize.zip"
-  ditto -c -k --keepParent "$APP_BUNDLE" "$APP_ZIP"
-  notarize "$APP_ZIP"
-  xcrun stapler staple "$APP_BUNDLE"
-  rm -f "$APP_ZIP"
-fi
+# Only the DMG goes to Apple (below), so there's one wait instead of two. Apple checks the app inside it as
+# part of that submission; the approval ("ticket") is stapled to the DMG, and the first launch of the copied
+# app confirms it with Apple online. OpenUsage also notarized the app on its own for its Sparkle updates,
+# which unpack apps straight from the DMG; Headroom has no updater, so that step is gone.
 
 echo "==> building $DMG_PATH"
 STAGE="$(mktemp -d)"
@@ -238,5 +219,4 @@ fi
 
 echo "==> done"
 echo "    DMG:  $DMG_PATH"
-echo "    dSYM: $APP_DSYM (uploaded to PostHog for crash symbolication by release.yml)."
-echo "    The appcast is generated from this DMG by generate_appcast (see release.yml)."
+echo "    dSYM: $APP_DSYM (keep it to read crash logs from this exact build)."

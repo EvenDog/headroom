@@ -41,13 +41,13 @@ demo app. Turn it off to restart the normal dev app with its existing accounts a
 
 ## Read the logs
 
-OpenUsage logs through unified logging under the subsystem `OpenUsage`, with categories such as
+OpenUsage logs through unified logging under the subsystem `Headroom`, with categories such as
 `refresh`, `http`, `auth`, `updates`, and `config`.
 
 ```sh
-log stream --info --predicate 'subsystem == "OpenUsage"'
-log stream --info --predicate 'subsystem == "OpenUsage" AND category == "refresh"'
-log show --last 2h --predicate 'subsystem == "OpenUsage" AND category == "refresh"'
+log stream --info --predicate 'subsystem == "Headroom"'
+log stream --info --predicate 'subsystem == "Headroom" AND category == "refresh"'
+log show --last 2h --predicate 'subsystem == "Headroom" AND category == "refresh"'
 ```
 
 - macOS keeps info lines in memory only, so `log show` finds them for a few minutes at most. Each

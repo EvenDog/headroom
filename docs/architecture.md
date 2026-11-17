@@ -92,5 +92,5 @@ JSON. The command never refreshes and never opens the Keychain.
   check for updates. See [Updates](updates.md).
 - `PostHogTelemetrySink` sends the anonymous daily ping, crash reports, and optional daily account
   counts by provider. Events name providers, never accounts. See [Privacy](privacy.md).
-- `AppLog` writes to unified logging (subsystem `OpenUsage`). It drops lines below the level set in
+- `AppLog` writes to unified logging (subsystem `Headroom`). It drops lines below the level set in
   Settings and redacts every message with `LogRedaction`. See [Debugging](debugging.md).

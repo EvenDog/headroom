@@ -16,11 +16,12 @@ enum PopoverScreen: Hashable, Sendable {
 }
 
 enum SettingsTab: Hashable, Sendable, CaseIterable {
-    case general, display, alerts, advanced
+    case general, accounts, display, alerts, advanced
 
     var title: String {
         switch self {
         case .general: "General"
+        case .accounts: "Accounts"
         case .display: "Display"
         case .alerts: "Alerts"
         case .advanced: "Advanced"
@@ -30,6 +31,7 @@ enum SettingsTab: Hashable, Sendable, CaseIterable {
     var symbol: String {
         switch self {
         case .general: "gearshape"
+        case .accounts: "person.crop.circle"
         case .display: "macwindow"
         case .alerts: "bell"
         case .advanced: "terminal"
@@ -37,9 +39,22 @@ enum SettingsTab: Hashable, Sendable, CaseIterable {
     }
 }
 
+/// What the panel asks the Settings window to show.
+enum SettingsWindowRequest: Equatable {
+    case tab(SettingsTab)
+    /// The Accounts tab, opened to one account's page, or to the list when nil.
+    case account(String?)
+    /// The Accounts tab with the Add Account sheet open.
+    case addAccount
+}
+
 @MainActor
 @Observable
 final class PopoverState {
+    /// Set only on the panel's state, by `StatusItemController`. When set, Accounts and Settings open in the
+    /// Settings window instead of sliding over the panel. Left nil, the panel slides as it always did.
+    @ObservationIgnored var opensSettingsWindow: ((SettingsWindowRequest) -> Void)?
+
     var screen = PopoverScreen.dashboard {
         didSet {
             guard screen != oldValue else { return }
@@ -90,15 +105,38 @@ final class PopoverState {
     }
 
     func toggle(_ target: PopoverScreen) {
+        if let opensSettingsWindow, target != .dashboard {
+            opensSettingsWindow(.tab(target == .accounts ? .accounts : .general))
+            return
+        }
         withAnimation(Motion.modeSwitch) { screen = screen == target ? .dashboard : target }
     }
 
     func openAccounts(_ providerID: String?) {
+        if let opensSettingsWindow {
+            opensSettingsWindow(.account(providerID))
+            return
+        }
         withAnimation(Motion.modeSwitch) {
             customizeProviderID = providerID
             customizeHubID = nil
             screen = .accounts
         }
+    }
+
+    /// Opens the Add Account sheet: in the Settings window when the panel has one, otherwise right here.
+    func addAccount() {
+        if let opensSettingsWindow {
+            opensSettingsWindow(.addAccount)
+        } else {
+            isAddingAccount = true
+        }
+    }
+
+    /// Picks a tab in the Settings window. Accounts shows the accounts screen; every other tab shows Settings.
+    func selectSettingsTab(_ tab: SettingsTab) {
+        settingsTab = tab
+        screen = tab == .accounts ? .accounts : .settings
     }
 
     func showDashboard(on tab: DashboardTab) {

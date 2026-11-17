@@ -106,10 +106,12 @@ final class StatusItemController: NSObject {
         onDismiss: { [weak self] in self?.hidePanel() }
     )
     private let host: NSHostingView<AnyView>
+    private let settingsWindow: SettingsWindowController
 
     init(container: AppContainer, updater: UpdaterController) {
         self.container = container
         self.updater = updater
+        self.settingsWindow = SettingsWindowController(container: container, updater: updater)
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.statusItem = statusItem
 
@@ -167,6 +169,11 @@ final class StatusItemController: NSObject {
         }
 
         heightController.installBridge()
+
+        // Accounts and Settings open in their own window instead of sliding over the panel.
+        container.popover.opensSettingsWindow = { [weak self] request in
+            self?.openSettingsWindow(request)
+        }
 
         AppLog.info(.statusItem, "Status item ready (button: \(self.statusItem.button != nil), shortcut: \(KeyboardShortcuts.getShortcut(for: .togglePopover)?.description ?? "none"))")
     }
@@ -279,7 +286,7 @@ final class StatusItemController: NSObject {
             self?.openSettings()
         })
         menu.addItem(.separator())
-        menu.addItem(ClosureMenuItem(title: "Quit OpenUsage", systemSymbol: "power", keyEquivalent: "q") {
+        menu.addItem(ClosureMenuItem(title: "Quit Headroom", systemSymbol: "power", keyEquivalent: "q") {
             NSApplication.shared.terminate(nil)
         })
 
@@ -289,10 +296,13 @@ final class StatusItemController: NSObject {
     }
 
     private func openSettings() {
-        container.popover.screen = .settings
-        if !panel.isVisible {
-            showPanel()
-        }
+        openSettingsWindow(.tab(.general))
+    }
+
+    /// Closes the panel, which would otherwise float over the window, and opens the Settings window.
+    private func openSettingsWindow(_ request: SettingsWindowRequest) {
+        if panel.isVisible { hidePanel() }
+        settingsWindow.show(request)
     }
 
     func togglePopover() {

@@ -108,7 +108,7 @@ shopt -u nullglob
 # assets/AppIcon.prebuilt whenever the source changes. CFBundleIconName below must match the .icon
 # stem ("AppIcon").
 echo "==> installing app icon (assets/AppIcon.prebuilt)"
-cp "$ROOT_DIR/assets/AppIcon.prebuilt/Assets.car" "$APP_RESOURCES/Assets.car"
+# Headroom ships only an .icns; the old compiled catalog (Assets.car) is gone with the OpenUsage logo.
 cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
 
 cat >"$INFO_PLIST" <<PLIST

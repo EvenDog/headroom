@@ -31,7 +31,7 @@ final class CommandLineToolInstaller {
     init(
         sourcePath: String = Bundle.main.bundleURL
             .appendingPathComponent("Contents/Helpers/openusage").path,
-        destinationPath: String = "/usr/local/bin/openusage",
+        destinationPath: String = "/usr/local/bin/headroom",
         fileManager: FileManager = .default,
         performPrivileged: (@MainActor (Operation, String, String) -> OperationResult)? = nil
     ) {
@@ -64,11 +64,11 @@ final class CommandLineToolInstaller {
         refreshStatus()
         guard status != .installed else { return }
         guard status != .conflict else {
-            errorMessage = "\(destinationPath) already exists and wasn't installed by OpenUsage."
+            errorMessage = "\(destinationPath) already exists and wasn't installed by Headroom."
             return
         }
         guard fileManager.isExecutableFile(atPath: sourcePath) else {
-            errorMessage = "The bundled terminal helper couldn't be found. Reinstall OpenUsage and try again."
+            errorMessage = "The bundled terminal helper couldn't be found. Reinstall Headroom and try again."
             return
         }
         var replacing: String?
@@ -82,12 +82,13 @@ final class CommandLineToolInstaller {
         handle(performPrivileged(.uninstall, sourcePath, destinationPath), action: "remove")
     }
 
-    /// Every OpenUsage installer, main's included, links the command to `<OpenUsage….app>/Contents/Helpers/openusage`.
+    /// Every installer links the command to `<OpenUsage….app>/Contents/Helpers/openusage`, or in a Headroom
+    /// release `<Headroom….app>/Contents/Helpers/openusage` (the file inside the app keeps its old name).
     static func isOpenUsageHelper(_ path: String) -> Bool {
         let components = (path as NSString).pathComponents
         guard components.count >= 4, Array(components.suffix(3)) == ["Contents", "Helpers", "openusage"] else { return false }
         let bundle = components[components.count - 4]
-        return bundle.hasPrefix("OpenUsage") && bundle.hasSuffix(".app")
+        return (bundle.hasPrefix("OpenUsage") || bundle.hasPrefix("Headroom")) && bundle.hasSuffix(".app")
     }
 
     private func handle(_ result: OperationResult, action: String) {

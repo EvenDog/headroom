@@ -364,7 +364,7 @@ final class WidgetDataStore {
         let backoff = backoffs[providerID]
         if let backoff, backoff.providerAsked, date < backoff.retryAt {
             let name = providersByID[providerID]?.provider.displayName ?? "The provider"
-            return "\(name) asked OpenUsage to wait. Retrying at \(Formatters.compactClock(backoff.retryAt, now: date))."
+            return "\(name) asked Headroom to wait. Retrying at \(Formatters.compactClock(backoff.retryAt, now: date))."
         }
         if let snapshot = snapshots[providerID], snapshot.isStale(at: date),
            let duration = Formatters.duration(from: snapshot.refreshedAt, to: date) {

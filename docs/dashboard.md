@@ -169,11 +169,11 @@ cards. **Install Update** opens the update window, and ✕ hides the card until 
 
 | Key | Action |
 |---|---|
-| Return | From the dashboard, open Accounts; from an account's page, return to the list; from the list or Settings, return to the dashboard |
-| Esc | Same as Return one level up; from the dashboard, close the panel |
+| Return | From the dashboard, open Accounts in the Settings window |
+| Esc | Close the panel |
 | Space | Open the details for a focused usage-history figure or Limit Resets count |
 | ⌘Z | Undo the last layout change |
 | ⌘R | Refresh now (skips the cache) |
-| ⌘, | Open or close Settings |
+| ⌘, | Open the Settings window |
 
 A global shortcut, recorded in Settings, toggles the panel from anywhere.

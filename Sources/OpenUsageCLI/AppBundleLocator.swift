@@ -17,6 +17,7 @@ struct AppBundleLocator: Sendable {
             )
         }
 
-        return AppBundleLocator(bundleIdentifier: "com.robinebers.openusage", version: nil)
+        // Only reached when run outside an app bundle; points at the Headroom release.
+        return AppBundleLocator(bundleIdentifier: "com.evendog.headroom", version: nil)
     }
 }

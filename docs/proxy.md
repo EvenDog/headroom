@@ -26,7 +26,7 @@ OpenUsage can send its provider requests through a proxy.
   [Debugging](debugging.md):
 
   ```sh
-  log show --last 1h --predicate 'subsystem == "OpenUsage" AND category == "config"'
+  log show --last 1h --predicate 'subsystem == "Headroom" AND category == "config"'
   ```
 
 ## What goes through the proxy

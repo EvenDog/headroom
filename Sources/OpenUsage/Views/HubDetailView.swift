@@ -33,7 +33,7 @@ struct HubDetailView: View {
                             .cardSurface()
                         }
                         if unsupported > 0 {
-                            Text("\(CLIProxyHub.count(unsupported, "login")) OpenUsage doesn’t support yet")
+                            Text("\(CLIProxyHub.count(unsupported, "login")) Headroom doesn’t support yet")
                                 .font(.callout)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, 12)

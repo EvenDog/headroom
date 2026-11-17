@@ -11,22 +11,24 @@ final class UpdateControlsTests: QuietWindowTestCase {
     func testTheOptionsMenuChecksForUpdatesBetweenSettingsAndReportAnIssueWhileSparkleCan() async throws {
         try QuietTestProcess.requireFocus()
         let updater = UpdaterController()
+        updater.isActive = true // a build with an update feed; Headroom releases hide the item without one
         for canCheck in [false, true] {
             updater.canCheckForUpdates = canCheck
             let items = try await optionsMenuItems(updater: updater)
             XCTAssertEqual(items.map(\.title), [
-                "Accounts", "Settings", "", "Check for Updates…", "", "Report an Issue…", "About OpenUsage", "Quit OpenUsage",
+                "Accounts", "Settings", "", "Check for Updates…", "", "Report an Issue…", "About Headroom", "Quit Headroom",
             ])
             XCTAssertEqual(items[3].isEnabled, canCheck, "Check for Updates… follows canCheckForUpdates (\(canCheck))")
         }
     }
 
-    func testSettingsShowsTheUpdatesSectionAndDisablesItInADevBuild() async throws {
-        for active in [false, true] {
-            let switches = try await settingsSwitches(updaterActive: active)
-            XCTAssertEqual(switches.count, 3, "Launch at Login, Check Automatically and Beta Updates (active: \(active))")
-            XCTAssertEqual(switches.dropFirst().map(\.isEnabled), [active, active], "the update switches follow isActive")
-        }
+    func testSettingsShowsTheUpdatesSectionOnlyInABuildWithAnUpdateFeed() async throws {
+        let withoutFeed = try await settingsSwitches(updaterActive: false)
+        XCTAssertEqual(withoutFeed.count, 1, "only Launch at Login: a build without a feed hides Updates")
+
+        let withFeed = try await settingsSwitches(updaterActive: true)
+        XCTAssertEqual(withFeed.count, 3, "Launch at Login, Check Automatically and Beta Updates")
+        XCTAssertEqual(withFeed.dropFirst().map(\.isEnabled), [true, true], "the update switches are usable")
     }
 
     func testTheDashboardShowsTheBannerForAnAvailableUpdate() async throws {
