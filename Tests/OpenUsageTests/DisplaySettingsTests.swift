@@ -21,10 +21,10 @@ final class DisplaySettingsTests: QuietWindowTestCase {
         ])
     }
 
-    func testDisplayHoldsMenuBarIconsThenUsageThenUnifyAccounts() async throws {
+    func testDisplayHoldsMenuBarIconsThenMenuBarBarsThenUsageThenUnifyAccounts() async throws {
         try await assertHeadingsAndPickers(.display, [
-            "Menu Bar Icons", MenuBarLimit.upToThree.label, "Usage", WidgetDisplayMode.remaining.label, ResetDisplayMode.relative.label,
-            "Unify Accounts",
+            "Menu Bar Icons", MenuBarLimit.upToThree.label, "Menu Bar Bars", "None", "None", "None",
+            "Usage", WidgetDisplayMode.remaining.label, ResetDisplayMode.relative.label, "Unify Accounts",
         ])
     }
 

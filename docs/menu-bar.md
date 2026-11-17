@@ -14,8 +14,12 @@ Priority lists.
 - Limits past that number show as a count, like `+7`. Used Up limits never count. With Always Show
   In Menu Bar off, only limits running out show or count.
 - With nothing to show, or with **App Icon Only**, the strip shows the app icon.
+- With any limit picked under **Settings → Display → Menu Bar Bars**, the strip instead shows those
+  limits as thin bars stacked top to bottom, Bar 1 on top. A bar fills as Show Usage As reads: used
+  fills up, remaining empties. A picked limit with no reading shows as an empty bar. Max Items and
+  Always Show don't apply while bars are picked; set every bar to None to go back.
 - With [Privacy Mode](privacy.md#privacy-mode) on, it shows the app icon while your screen
-  is shared or recorded.
+  is shared or recorded, bars or not.
 - When an [update](updates.md) is available, the app icon shows at the end of the strip until the
   update banner goes away.
 - When a provider has more than one account, its mark carries the account name's initials: "Personal"

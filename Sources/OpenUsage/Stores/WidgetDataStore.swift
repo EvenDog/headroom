@@ -16,6 +16,8 @@ final class WidgetDataStore {
     private static let resetDisplayModeKey = "resetDisplayMode"
     private static let menuBarLimitKey = "menuBarLimit"
     private static let menuBarAlwaysShowsKey = "menuBarAlwaysShows"
+    private static let menuBarBarSlotsKey = "menuBarBarSlots"
+    static let menuBarBarSlotCount = 3
     private static let priorityWarningKey = "priorityWarning"
     private static let priorityCriticalKey = "priorityCritical"
     private static let priorityBurningFastKey = "priorityBurningFast"
@@ -48,6 +50,21 @@ final class WidgetDataStore {
     /// The menu bar lists every Priority section in the tab's order instead of only what's running out.
     var menuBarAlwaysShows: Bool {
         didSet { defaults.set(menuBarAlwaysShows, forKey: Self.menuBarAlwaysShowsKey) }
+    }
+
+    /// The limits drawn as stacked bars in the menu bar, one per slot, top to bottom. An empty string is an
+    /// empty slot. With every slot empty the menu bar shows the usual strip.
+    private(set) var menuBarBarSlots: [String] {
+        didSet { defaults.set(menuBarBarSlots, forKey: Self.menuBarBarSlotsKey) }
+    }
+
+    /// Puts a limit's ID (or "" for none) in one bar slot, growing the list to reach that slot.
+    func setMenuBarBar(_ lineID: String, inSlot slot: Int) {
+        guard (0..<Self.menuBarBarSlotCount).contains(slot) else { return }
+        var slots = menuBarBarSlots
+        while slots.count <= slot { slots.append("") }
+        slots[slot] = lineID
+        menuBarBarSlots = slots
     }
 
     var priorityLimits: PriorityLimits {
@@ -101,6 +118,7 @@ final class WidgetDataStore {
         self.resetDisplayMode = defaults.enumValue(forKey: Self.resetDisplayModeKey, default: .relative)
         self.menuBarLimit = defaults.enumValue(forKey: Self.menuBarLimitKey, default: .upToThree)
         self.menuBarAlwaysShows = defaults.bool(forKey: Self.menuBarAlwaysShowsKey)
+        self.menuBarBarSlots = defaults.stringArray(forKey: Self.menuBarBarSlotsKey) ?? []
         self.priorityLimits = PriorityLimits(
             warning: defaults.object(forKey: Self.priorityWarningKey) as? Int ?? PriorityLimits.standard.warning,
             critical: defaults.object(forKey: Self.priorityCriticalKey) as? Int ?? PriorityLimits.standard.critical

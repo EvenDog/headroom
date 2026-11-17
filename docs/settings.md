@@ -21,6 +21,12 @@ Alerts, and Advanced. Changes apply at once. Hover the ⓘ beside a setting to s
 - **Always Show In Menu Bar.** The menu bar lists everything Priority does, in its order: Pinned,
   Running Out, Use It or Lose It, then Used Up. Off by default, showing only what's running out.
 
+## Menu bar bars
+
+- **Bar 1, Bar 2, Bar 3.** Pick a limit for each, or None, to show them as stacked bars in the menu
+  bar in place of icons. Only limits with a cap can be bars. All None by default. See
+  [Menu bar](menu-bar.md).
+
 ## Usage display
 
 - **Show Usage As.** `48% used` or `52% left`, on the dashboard and in the menu bar.

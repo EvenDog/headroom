@@ -255,6 +255,50 @@ final class MenuBarContentTests: XCTestCase {
         XCTAssertTrue(relaunched.menuBarAlwaysShows)
     }
 
+    // MARK: Stacked bars
+
+    func testBarsFollowTheSlotOrderSkipEmptySlotsAndKeepAMissingPickAsAnEmptyBar() {
+        let accounts = [account(personal, limit("Session", used: 25), limit("Weekly", used: 80)),
+                        account(chatGPT, limit("Weekly", used: 50))]
+        let bars = MenuBarContentBuilder.bars(
+            slots: ["codex@1.Weekly", "", "claude@1.Session", "claude@9.Gone"], accounts: accounts
+        )
+
+        XCTAssertEqual(bars.map(\.label), ["\(chatGPT.fullName) · Weekly", "\(personal.fullName) · Session", "Unavailable"])
+        XCTAssertEqual(bars.map(\.fraction), [0.5, 0.25, nil])
+        XCTAssertEqual(Set(bars.map(\.id)).count, bars.count, "each bar needs its own ID to be drawn")
+    }
+
+    func testOnlyLimitsWithACapAndAReadingCanBeBars() {
+        var noReading = limit("Session", used: 0)
+        noReading.hasData = false
+        let uncapped = WidgetData(title: "Spend", kind: .dollars, used: 12, limit: nil)
+        let choices = MenuBarContentBuilder.barChoices(accounts: [account(personal, limit("Weekly", used: 10), noReading, uncapped)])
+
+        XCTAssertEqual(choices.map(\.id), ["claude@1.Weekly"])
+    }
+
+    func testTheBarPicksSurviveARelaunchAndIgnoreSlotsPastTheLast() {
+        let defaults = isolatedDefaults()
+        let store = WidgetDataStore.forTesting([], defaults: defaults)
+        XCTAssertEqual(store.menuBarBarSlots, [])
+
+        store.setMenuBarBar("codex@1.Weekly", inSlot: 1)
+        store.setMenuBarBar("claude@1.Session", inSlot: WidgetDataStore.menuBarBarSlotCount)
+        XCTAssertEqual(WidgetDataStore.forTesting([], defaults: defaults).menuBarBarSlots, ["", "codex@1.Weekly"])
+    }
+
+    func testBarsDrawAsATemplateImageThatFitsTheMenuBar() throws {
+        let bars = (0..<WidgetDataStore.menuBarBarSlotCount).map {
+            MenuBarContent.Bar(id: "\($0)", label: "Limit \($0)", fraction: 0.5)
+        }
+        let image = try XCTUnwrap(MenuBarStripRenderer.image(for: MenuBarContent(items: [], bars: bars)))
+
+        XCTAssertTrue(image.isTemplate)
+        XCTAssertLessThanOrEqual(image.size.height, NSStatusBar.system.thickness)
+        XCTAssertEqual(image.accessibilityDescription, "Limit 0 50%; Limit 1 50%; Limit 2 50%")
+    }
+
     func testALimitIsNamedAsThePanelNamesIt() {
         let provider = Provider(id: "cursor", kind: .cursor)
         let data = WidgetData(title: "Extra Usage", kind: .dollars, used: 400, limit: 500)

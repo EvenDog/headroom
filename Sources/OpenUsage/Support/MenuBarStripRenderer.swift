@@ -5,7 +5,7 @@ import SwiftUI
 enum MenuBarStripRenderer {
     static func image(for content: MenuBarContent) -> NSImage? {
         guard !content.isEmpty else { return content.updateAvailable ? appIconWithUpdateDot : nil }
-        let renderer = ImageRenderer(content: MenuBarTextStrip(content: content))
+        let renderer = ImageRenderer(content: strip(for: content))
         renderer.scale = 2
         guard let rendered = renderer.cgImage else { return nil }
         let cgImage = trimmedToVisibleContent(rendered) ?? rendered
@@ -16,6 +16,16 @@ enum MenuBarStripRenderer {
         image.isTemplate = true
         image.accessibilityDescription = content.accessibilityText
         return image
+    }
+
+    /// The stacked bars when the user picked any, otherwise the usual logo-and-value strip.
+    @ViewBuilder
+    private static func strip(for content: MenuBarContent) -> some View {
+        if content.bars.isEmpty {
+            MenuBarTextStrip(content: content)
+        } else {
+            MenuBarBarStack(content: content)
+        }
     }
 
     static var appIcon: NSImage {

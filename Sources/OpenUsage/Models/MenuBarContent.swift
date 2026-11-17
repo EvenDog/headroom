@@ -9,17 +9,30 @@ struct MenuBarContent: Equatable {
         let value: String
     }
 
+    /// One of the stacked bars the user picked in Settings.
+    struct Bar: Equatable, Identifiable {
+        let id: String
+        let label: String
+        /// How full the bar is, 0 to 1, following Show Usage As. Nil when the limit has no reading.
+        let fraction: Double?
+    }
+
     let items: [Item]
     var overflow = 0
     var updateAvailable = false
+    /// When not empty, the menu bar draws these stacked bars instead of `items`.
+    var bars: [Bar] = []
 
-    var isEmpty: Bool { items.isEmpty }
+    var isEmpty: Bool { items.isEmpty && bars.isEmpty }
 
     var accessibilityText: String {
         let shown = items.map { "\($0.provider.fullName) \($0.label) \($0.value)" }
+        let barTexts = bars.map { bar in
+            "\(bar.label) \(bar.fraction.map { "\(Int(($0 * 100).rounded()))%" } ?? "no data")"
+        }
         let more = overflow > 0 ? ["\(overflow) more"] : []
         let update = updateAvailable ? ["Update available"] : []
-        return (shown + more + update).joined(separator: "; ")
+        return (shown + barTexts + more + update).joined(separator: "; ")
     }
 }
 
@@ -45,6 +58,32 @@ enum MenuBarContentBuilder {
             )
         }
         return MenuBarContent(items: shown, overflow: max(0, counted.count - shown.count))
+    }
+
+    /// Turns the saved bar slots into bars, top to bottom, skipping empty slots. A picked limit that isn't
+    /// on the dashboard right now (no reading yet, or its account was removed) becomes an empty bar so the
+    /// other bars keep their places.
+    static func bars(slots: [String], accounts: [DashboardAccount]) -> [MenuBarContent.Bar] {
+        let choices = barChoices(accounts: accounts)
+        return slots.enumerated().compactMap { slot, lineID in
+            guard !lineID.isEmpty else { return nil }
+            let choice = choices.first { $0.id == lineID }
+            return MenuBarContent.Bar(
+                id: "\(slot).\(lineID)", // the slot number keeps IDs unique if one limit is picked twice
+                label: choice?.label ?? "Unavailable",
+                fraction: choice?.fraction
+            )
+        }
+    }
+
+    /// Every limit that can be a bar, in dashboard order: only those with a cap, since a bar needs
+    /// something to fill toward. Each comes with the name Settings shows for it.
+    static func barChoices(accounts: [DashboardAccount]) -> [(id: String, label: String, fraction: Double)] {
+        accounts.flatMap { account in
+            account.lines
+                .filter { $0.data.hasData && $0.data.isBounded }
+                .map { (id: $0.id, label: "\(account.provider.fullName) · \($0.data.title)", fraction: $0.data.fraction) }
+        }
     }
 
     static func shortLabel(_ label: String) -> String {

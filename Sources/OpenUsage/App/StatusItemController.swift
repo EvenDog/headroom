@@ -203,11 +203,14 @@ final class StatusItemController: NSObject {
     }
 
     private func updateImage() {
-        let (accounts, pinned, burningFast, useItOrLoseIt, limit, alwaysShows, updateAvailable) = withObservationTracking {
-            let limit = container.hideFromScreenShare.isConcealing ? .iconOnly : container.dataStore.menuBarLimit
-            let accounts = limit == .iconOnly ? [] : container.dataStore.accounts(in: container.layout.displayGroups)
+        let (accounts, pinned, burningFast, useItOrLoseIt, limit, alwaysShows, updateAvailable, barSlots) = withObservationTracking {
+            let isConcealing = container.hideFromScreenShare.isConcealing
+            let limit = isConcealing ? .iconOnly : container.dataStore.menuBarLimit
+            // Privacy Mode hides the bars too, leaving only the app icon.
+            let barSlots = isConcealing ? [] : container.dataStore.menuBarBarSlots.filter { !$0.isEmpty }
+            let accounts = limit == .iconOnly && barSlots.isEmpty ? [] : container.dataStore.accounts(in: container.layout.displayGroups)
             return (accounts, container.layout.state.priorityPinIDs, container.dataStore.burningFast, container.dataStore.showsUseItOrLoseIt,
-                    limit, container.dataStore.menuBarAlwaysShows, updater.availableUpdateVersion != nil)
+                    limit, container.dataStore.menuBarAlwaysShows, updater.availableUpdateVersion != nil, barSlots)
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .milliseconds(50))
@@ -216,21 +219,25 @@ final class StatusItemController: NSObject {
         }
         rankingTick?.cancel()
         showStrip(accounts: accounts, pinned: pinned, burningFast: burningFast, useItOrLoseIt: useItOrLoseIt, limit: limit,
-                  alwaysShows: alwaysShows, updateAvailable: updateAvailable)
+                  alwaysShows: alwaysShows, updateAvailable: updateAvailable, barSlots: barSlots)
     }
 
     private func showStrip(
         accounts: [DashboardAccount], pinned: Set<String>, burningFast: BurningFast?, useItOrLoseIt: Bool, limit: MenuBarLimit,
-        alwaysShows: Bool, updateAvailable: Bool
+        alwaysShows: Bool, updateAvailable: Bool, barSlots: [String]
     ) {
+        if !barSlots.isEmpty {
+            // Bars show fixed picks, not what's running out, so they skip the Priority ranking below.
+            let content = MenuBarContent(items: [], updateAvailable: updateAvailable,
+                                         bars: MenuBarContentBuilder.bars(slots: barSlots, accounts: accounts))
+            showImage(for: content)
+            return
+        }
         let now = Date()
         let board = PriorityBoard.make(accounts: accounts, pinned: pinned, burningFast: burningFast, useItOrLoseIt: useItOrLoseIt, now: now)
         var content = MenuBarContentBuilder.build(board: board, limit: limit, alwaysShows: alwaysShows)
         content.updateAvailable = updateAvailable
-        stripGate.show(content) { content in
-            statusItem.button?.image = MenuBarStripRenderer.image(for: content)
-                ?? MenuBarStripRenderer.appIcon
-        }
+        showImage(for: content)
         // The pace order can change between provider reads. A tick only reuses the current data;
         // registering another observation here would multiply subscriptions on every tick.
         guard board.requiresRankingClock(at: now) else { return }
@@ -238,7 +245,14 @@ final class StatusItemController: NSObject {
             try? await Task.sleep(for: .seconds(30), tolerance: .seconds(1))
             guard !Task.isCancelled else { return }
             self?.showStrip(accounts: accounts, pinned: pinned, burningFast: burningFast, useItOrLoseIt: useItOrLoseIt, limit: limit,
-                            alwaysShows: alwaysShows, updateAvailable: updateAvailable)
+                            alwaysShows: alwaysShows, updateAvailable: updateAvailable, barSlots: barSlots)
+        }
+    }
+
+    private func showImage(for content: MenuBarContent) {
+        stripGate.show(content) { content in
+            statusItem.button?.image = MenuBarStripRenderer.image(for: content)
+                ?? MenuBarStripRenderer.appIcon
         }
     }
 

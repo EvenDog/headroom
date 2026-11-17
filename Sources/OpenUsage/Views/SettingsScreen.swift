@@ -100,16 +100,19 @@ struct SettingsScreen: View {
     @ViewBuilder
     private var displayTab: some View {
         @Bindable var dataStore = dataStore
+        let showsBars = dataStore.menuBarBarSlots.contains { !$0.isEmpty }
         Section {
-            PriorityIconsPreview()
+            if !showsBars { PriorityIconsPreview() }
             picker("Max Items In Menu Bar", selection: $dataStore.menuBarLimit, options: MenuBarLimit.allCases.map { ($0, $0.label) })
+                .disabled(showsBars)
             Toggle(isOn: $dataStore.menuBarAlwaysShows) {
                 titled("Always Show In Menu Bar", info: "Show icons in the menu bar even if not requiring your attention yet")
             }
-            .disabled(dataStore.menuBarLimit == .iconOnly)
+            .disabled(dataStore.menuBarLimit == .iconOnly || showsBars)
         } header: {
             Text("Menu Bar Icons")
         }
+        menuBarBarsSection
         Section("Usage") {
             picker("Show Usage As", selection: $dataStore.meterStyle, options: WidgetDisplayMode.allCases.map { ($0, $0.label) })
             picker("Reset Times", selection: $dataStore.resetDisplayMode, options: ResetDisplayMode.allCases.map { ($0, $0.label) })
@@ -287,6 +290,35 @@ struct SettingsScreen: View {
         }
         .toggleStyle(.switch)
         .labelsHidden()
+    }
+
+    /// One dropdown per bar slot. Picking any limit swaps the menu bar's icons for stacked bars, top to bottom.
+    private var menuBarBarsSection: some View {
+        let choices = MenuBarContentBuilder.barChoices(accounts: dataStore.accounts(in: layout.displayGroups))
+        return Section {
+            ForEach(0..<WidgetDataStore.menuBarBarSlotCount, id: \.self) { slot in
+                let picked = dataStore.menuBarBarSlots.indices.contains(slot) ? dataStore.menuBarBarSlots[slot] : ""
+                Picker("Bar \(slot + 1)", selection: Binding(
+                    get: { picked },
+                    set: { dataStore.setMenuBarBar($0, inSlot: slot) }
+                )) {
+                    Text("None").tag("")
+                    // Keep a pick that has no reading right now selectable, so the dropdown doesn't go blank.
+                    if !picked.isEmpty, !choices.contains(where: { $0.id == picked }) {
+                        Text("Unavailable").tag(picked)
+                    }
+                    ForEach(choices, id: \.id) { choice in
+                        Text(choice.label).tag(choice.id)
+                    }
+                }
+            }
+        } header: {
+            Text("Menu Bar Bars")
+        } footer: {
+            Text("Pick limits to show as stacked bars instead of icons. Bar 1 is on top.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
     }
 
     /// A row's title followed by an info icon that shows what the row does on hover.
