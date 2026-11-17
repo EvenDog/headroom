@@ -10,10 +10,9 @@ struct PopoverTopBar: View {
     var body: some View {
         switch screen {
         case .dashboard:
-            CapsuleSegments(options: DashboardTab.allCases.map { ($0, $0.label) }, selection: Bindable(popover).dashboardTab, selectsOnPress: true)
-                .padding(.horizontal, PanelMetrics.margin)
-                .padding(.top, PanelMetrics.margin)
-                .padding(.bottom, DashboardContentView.barGap)
+            // No tab switch: the dashboard is one page. This keeps the same space above it.
+            Color.clear
+                .frame(height: PanelMetrics.margin)
         case .accounts:
             if let providerID = popover.customizeProviderID, let provider = layout.provider(id: providerID) {
                 navigationBar(back: { popover.back() }) {

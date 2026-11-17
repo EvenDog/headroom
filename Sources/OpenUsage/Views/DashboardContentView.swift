@@ -45,14 +45,21 @@ struct DashboardContentView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 22)
         } else {
-            switch popover.dashboardTab {
-            case .priority:
+            // One page instead of OpenUsage's two tabs: what needs you first, then every provider.
+            VStack(alignment: .leading, spacing: PanelMetrics.sectionSpacing) {
                 PriorityDashboardView()
-            case .allUsage:
-                WidgetGroupedListView(
-                    reorderSpaceName: reorderSpaceName,
-                    reorderLift: $reorderLift
-                )
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("All Usage")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
+                        .padding(.bottom, 2)
+                        .accessibilityAddTraits(.isHeader)
+                    WidgetGroupedListView(
+                        reorderSpaceName: reorderSpaceName,
+                        reorderLift: $reorderLift
+                    )
+                }
             }
         }
     }

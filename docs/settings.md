@@ -11,7 +11,6 @@ The [Accounts](accounts.md) screen: add, edit, rename, reorder, and remove accou
 ## General
 
 - **Launch at Login.** Starts OpenUsage when you sign in to your Mac.
-- **Default Tab.** Priority or All Usage, the tab the panel opens to.
 - **Global Shortcut.** Opens and closes the panel from any app. Click the field and press the keys.
 
 ## Appearance
@@ -75,7 +74,7 @@ Each alert has two separate switches. **Priority** lists the limit in Priority.
 Priority is on by default for all four, and Notify is off. Turning the first Notify on asks macOS
 for permission. If notifications are off for OpenUsage, click **System Settings** in the notice to
 open **Notifications → OpenUsage** and allow them. An alert notifies once per reset window. All but
-Use It or Lose It notify again once the limit recovers. Click a notification to open All Usage.
+Use It or Lose It notify again once the limit recovers. Click a notification to open the dashboard.
 
 ## Privacy
 

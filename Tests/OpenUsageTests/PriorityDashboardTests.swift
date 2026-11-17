@@ -53,28 +53,13 @@ final class PriorityDashboardTests: QuietWindowTestCase {
 
     func testClickingAnAmountFlipsItAndTheRowItselfDoesNothing() async throws {
         let hosted = hostDashboard(tab: .priority)
-        click(CGPoint(x: hosted.host.bounds.midX, y: 90), hosted.window, hosted.host)
+        // The first Running Out row. (55, not 90: the dashboard lost its 35 pt tab switch when the tabs merged.)
+        click(CGPoint(x: hosted.host.bounds.midX, y: 55), hosted.window, hosted.host)
         XCTAssertEqual(hosted.popover.dashboardTab, .priority)
         XCTAssertNil(hosted.defaults.string(forKey: "meterStyle"))
 
-        click(CGPoint(x: hosted.host.bounds.maxX - 40, y: 90), hosted.window, hosted.host)
+        click(CGPoint(x: hosted.host.bounds.maxX - 40, y: 55), hosted.window, hosted.host)
         try await waitUntil { hosted.defaults.string(forKey: "meterStyle") == WidgetDisplayMode.used.rawValue }
-    }
-
-    func testPickingATabGoesBackToTheTop() async throws {
-        let hosted = hostDashboard(tab: .allUsage)
-        let first = try XCTUnwrap(hosted.accounts.first)
-        try await waitUntil { hosted.frames.byID[first] != nil }
-        let top = try XCTUnwrap(hosted.frames.byID[first]).minY
-        let scroller = try XCTUnwrap(scrollViews(in: hosted.host).first)
-        scroller.contentView.scroll(to: NSPoint(x: 0, y: 120))
-        scroller.reflectScrolledClipView(scroller.contentView)
-        try await waitUntil { hosted.frames.byID[first].map { $0.minY < top - 50 } == true }
-
-        hosted.popover.dashboardTab = .priority
-        try await waitUntil { hosted.frames.byID[first] == nil }
-        hosted.popover.dashboardTab = .allUsage
-        try await waitUntil { hosted.frames.byID[first].map { abs($0.minY - top) < 1 } == true }
     }
 
     func testFirstAccountCanBeAddedFromEitherEmptyTab() async throws {

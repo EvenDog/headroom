@@ -1,10 +1,10 @@
 # Dashboard
 
-The panel that opens from the menu bar icon. It has two tabs, Priority and All Usage.
+The panel that opens from the menu bar icon. It's one page: [Priority](#priority) on top, then
+[All Usage](#all-usage) below it, so a limit that needs you shows in both.
 
-- The menu bar icon and the global shortcut open the Default Tab from Settings (Priority by
-  default). A usage notification opens All Usage.
-- With no accounts, both tabs show **Add Account**.
+- The menu bar icon, the global shortcut, and a usage notification all open this page.
+- With no accounts, it shows **Add Account**.
 - Closing the panel returns it to the dashboard, scrolled to the top.
 
 ## Priority
@@ -35,8 +35,8 @@ Priority shows only what needs you, most urgent first.
 With Pace Marks on, each limit's ring carries the same pace mark as its bar in All Usage, clockwise
 from 12 o'clock.
 
-Ties keep your dashboard order. If no account has a limit to monitor, **No Reported Limits** links
-to All Usage.
+Ties keep your dashboard order. If no account has a limit to monitor, Priority shows **No Reported
+Limits**.
 
 ## All Usage
 
@@ -53,7 +53,7 @@ metric with data that you haven't hidden, in your order.
 
 A limit row shows its label, a bar, its amount, and the time until it resets.
 
-- Click any amount, on either tab, to flip every row between used and left. Click any reset to flip
+- Click any amount, in either section, to flip every row between used and left. Click any reset to flip
   between a countdown and the exact time. **Settings → Display** has the same two switches.
 - Countdowns update every 30 seconds. They show the largest unit and the next one down, like `45m`,
   `4h 12m`, `2d 5h`, `17d`, `3mo 17d`, or `1y 2mo`, and leave out a next unit of zero. `m` is minutes and
@@ -158,12 +158,12 @@ cards. **Install Update** opens the update window, and ✕ hides the card until 
 
 ## Footer
 
-- **OpenUsage** and the version, like `OpenUsage 0.8.0`, sit over **Next update in …**, which counts
+- **Headroom** and the version, like `Headroom 1.0.2`, sit over **Next update in …**, which counts
   down to the next refresh. Click it or press **⌘R** to refresh now. A dev build shows its commit,
   like `dev (abc1234)`.
-- On Priority, a button copies the tab as a PNG, leaving emails out the same way.
+- When Priority lists anything, a button copies Priority as a PNG, leaving emails out the same way.
 - The **⋯** menu has **Accounts**, **Settings**, **Check for Updates…**, **Report an Issue…**,
-  **About OpenUsage**, and **Quit OpenUsage**.
+  **About Headroom**, and **Quit Headroom**.
 
 ## Keyboard
 

@@ -18,7 +18,7 @@ final class DisplaySettingsTests: QuietWindowTestCase {
     /// Updates shows only in a build with an update feed, which tests and Headroom releases don't have.
     func testGeneralEndsWithAppearance() async throws {
         try await assertHeadingsAndPickers(.general, [
-            DashboardTab.priority.label, "Appearance", AppearanceSetting.system.label, TimeFormatSetting.auto.label,
+            "Appearance", AppearanceSetting.system.label, TimeFormatSetting.auto.label,
         ])
     }
 

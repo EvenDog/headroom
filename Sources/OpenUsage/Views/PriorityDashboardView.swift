@@ -12,7 +12,6 @@ struct PriorityDashboardView: View {
                 now: context.date,
                 onToggleMeterStyle: { dataStore.meterStyle.toggle() },
                 onToggleResetDisplay: { dataStore.resetDisplayMode.toggle() },
-                onShowAllUsage: { popover.dashboardTab = .allUsage },
                 onFixAccount: { popover.openAccounts($0) },
                 onMetricCommand: { command in
                     switch command {

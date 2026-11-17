@@ -20,7 +20,7 @@ struct PopoverFooter: View {
                     DemoDataLabel()
                     #endif
                     Spacer(minLength: 8)
-                    if popover.dashboardTab == .priority, liveBoard.hasRows { copyPriorityButton }
+                    if liveBoard.hasRows { copyPriorityButton }
                     optionsMenu
                 }
                 .padding(.horizontal, 4)

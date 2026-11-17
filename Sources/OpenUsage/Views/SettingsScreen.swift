@@ -13,7 +13,6 @@ struct SettingsScreen: View {
     @Environment(LayoutStore.self) private var layout
     @AppStorage(AppearanceSetting.key) private var appearance = AppearanceSetting.system
     @AppStorage(TimeFormatSetting.key) private var timeFormat = TimeFormatSetting.auto
-    @AppStorage(DashboardTab.defaultKey) private var defaultTab = DashboardTab.priority
     @AppStorage(PaceMilestone.critical.settingKey) private var criticalAlert = false
     @AppStorage(PaceMilestone.warning.settingKey) private var warningAlert = false
     @AppStorage(PaceMilestone.burningFast.settingKey) private var burningFastAlert = false
@@ -64,7 +63,6 @@ struct SettingsScreen: View {
                 get: { launchAtLogin.isEnabled },
                 set: { launchAtLogin.update(to: $0) }
             ))
-            picker("Default Tab", selection: $defaultTab, options: DashboardTab.allCases.map { ($0, $0.label) })
             LabeledContent("Global Shortcut") {
                 KeyboardShortcuts.Recorder(for: .togglePopover)
                     .disabled(popover.screen != .settings)
@@ -74,7 +72,6 @@ struct SettingsScreen: View {
                 SettingsNote(errorMessage)
             }
         }
-        .onChange(of: defaultTab) { _, newValue in popover.dashboardTab = newValue }
         Section("Appearance") {
             picker("Theme", selection: $appearance, options: AppearanceSetting.allCases.map { ($0, $0.label) })
                 .onChange(of: appearance) { AppearanceSetting.applyCurrent() }

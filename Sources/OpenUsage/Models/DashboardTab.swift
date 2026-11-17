@@ -1,5 +1,7 @@
 import Foundation
 
+/// OpenUsage's two dashboard tabs. Headroom shows both on one page, so the tab no longer changes what the
+/// panel shows; it's kept because the panel still remembers its height per tab.
 enum DashboardTab: String, Hashable, Sendable, CaseIterable {
     /// The tab the panel opens to, no matter which tab it was closed on.
     static let defaultKey = "defaultDashboardTab"
