@@ -27,8 +27,8 @@ final class UpdateControlsTests: QuietWindowTestCase {
         XCTAssertEqual(withoutFeed.count, 1, "only Launch at Login: a build without a feed hides Updates")
 
         let withFeed = try await settingsSwitches(updaterActive: true)
-        XCTAssertEqual(withFeed.count, 3, "Launch at Login, Check Automatically and Beta Updates")
-        XCTAssertEqual(withFeed.dropFirst().map(\.isEnabled), [true, true], "the update switches are usable")
+        XCTAssertEqual(withFeed.count, 2, "Launch at Login and Check Automatically (Beta Updates is hidden)")
+        XCTAssertEqual(withFeed.last?.isEnabled, true, "Check Automatically is usable")
     }
 
     func testTheDashboardShowsTheBannerForAnAvailableUpdate() async throws {

@@ -105,7 +105,7 @@ struct PopoverFooter: View {
                 Divider()
             }
 
-            Link(destination: URL(string: "https://github.com/EvenDog/openusage/issues/new")!) {
+            Link(destination: URL(string: "https://github.com/EvenDog/headroom/issues/new")!) {
                 Label("Report an Issue…", systemImage: "ladybug")
             }
 

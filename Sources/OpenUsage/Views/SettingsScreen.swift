@@ -90,8 +90,7 @@ struct SettingsScreen: View {
         Section("Updates") {
             Toggle("Check Automatically", isOn: $updater.automaticallyChecksForUpdates)
                 .disabled(!updater.isActive)
-            Toggle("Beta Updates", isOn: $updater.betaChannelEnabled)
-                .disabled(!updater.isActive)
+            // Headroom has one update stream, so OpenUsage's Beta Updates switch is hidden.
             HStack {
                 Spacer(minLength: 0)
                 Button("Check for Updates…") { updater.checkForUpdates() }

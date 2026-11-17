@@ -101,9 +101,8 @@ See [Privacy](privacy.md).
 
 ## Updates
 
-- **Check Automatically.** Checks about once an hour and shows **Update Available** on the
+- **Check Automatically.** Checks about once a day and shows **Update Available** on the
   dashboard.
-- **Beta Updates.** Includes pre-release builds.
 - **Check for Updates…** checks now.
 
 The dev build disables these. See [Updates](updates.md).

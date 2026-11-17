@@ -15,14 +15,15 @@ What this fork adds:
   them as thin bars stacked in the menu bar.
 - **A Settings window.** Settings and account management open in their own window, with an
   Accounts tab, instead of inside the menu bar panel.
-- **No analytics and no auto-updates.** Headroom sends nothing to the original project's analytics
-  and never checks its update feed.
+- **No analytics.** Headroom sends nothing to the original project's analytics, and updates come
+  from this fork's own releases.
 
 ## Installation
 
-Download the DMG from this fork's releases, open it, and drag Headroom to your Applications folder.
-To update, download and install a newer DMG. Requires macOS 15 (Sequoia) or later, on Apple Silicon
-or Intel.
+Download the DMG from the [latest release](https://github.com/EvenDog/headroom/releases/latest), open
+it, and drag Headroom to your Applications folder. From 1.0.2 on, Headroom updates itself with signed,
+notarized [Sparkle](docs/updates.md) updates. Requires macOS 15 (Sequoia) or later, on Apple Silicon or
+Intel.
 
 ## Supported Providers
 

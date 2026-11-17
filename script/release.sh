@@ -3,8 +3,9 @@ set -euo pipefail
 
 # Builds a distributable, Developer ID-signed, notarized Headroom.app (a fork of OpenUsage) and wraps it
 # in a DMG. The app is a universal binary (arm64 + x86_64) so it runs on both Apple Silicon and Intel
-# Macs; the DMG is the only output. Headroom ships without an update feed: it never checks for updates,
-# so a new version is installed by downloading a new DMG. This script does NOT push anything to GitHub.
+# Macs. Outputs: dist/Headroom-<version>.dmg and dist/appcast.xml, the update list the app checks (Sparkle).
+# The appcast is signed with Headroom's Sparkle key from your login Keychain (account "headroom"). This
+# script does NOT push anything to GitHub; script/publish_release.sh uploads both files as a GitHub Release.
 #
 # Example (signing identity from `security find-identity -v -p codesigning`):
 #   CODESIGN_IDENTITY="Developer ID Application: …" OPENUSAGE_VERSION=1.0.0 \
@@ -30,6 +31,13 @@ cd "$ROOT_DIR"
 
 APP_NAME="Headroom"
 BUNDLE_ID="com.evendog.headroom"
+REPO="EvenDog/headroom"
+# The app checks the appcast attached to the newest GitHub Release; `latest/download` always points there.
+FEED_URL="https://github.com/$REPO/releases/latest/download/appcast.xml"
+# Public half of Headroom's update-signing key (safe to publish). The private half stays in the Keychain.
+SPARKLE_PUBLIC_KEY="t8P0hHMv/ZRBTi3nWRzy89bYtIyWmIxCzdHUfth1bbA="
+SPARKLE_ACCOUNT="headroom"
+SPARKLE_BIN="$ROOT_DIR/.build/artifacts/sparkle/Sparkle/bin"
 MIN_SYSTEM_VERSION="15.0"
 VERSION="$OPENUSAGE_VERSION"
 # CFBundleShortVersionString carries the full version, including any pre-release suffix (e.g.
@@ -170,6 +178,10 @@ cat >"$APP_CONTENTS/Info.plist" <<PLIST
   <key>LSUIElement</key><true/>
   <key>NSPrincipalClass</key><string>NSApplication</string>
   <key>NSHighResolutionCapable</key><true/>
+  <key>SUFeedURL</key><string>$FEED_URL</string>
+  <key>SUPublicEDKey</key><string>$SPARKLE_PUBLIC_KEY</string>
+  <key>SUEnableAutomaticChecks</key><true/>
+  <key>SUScheduledCheckInterval</key><integer>86400</integer>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSExceptionDomains</key>
@@ -217,6 +229,20 @@ if [ "$NOTARIZE" = "1" ]; then
   echo "==> notarized + stapled"
 fi
 
+# Write the update list: one entry for this DMG, signed with the Sparkle key, pointing at the file this
+# version's GitHub Release will hold. generate_appcast reads every archive in a folder, so give it only this one.
+echo "==> writing appcast"
+APPCAST_STAGE="$(mktemp -d)"
+cp "$DMG_PATH" "$APPCAST_STAGE/"
+"$SPARKLE_BIN/generate_appcast" --account "$SPARKLE_ACCOUNT" \
+  --download-url-prefix "https://github.com/$REPO/releases/download/v$VERSION/" \
+  --link "https://github.com/$REPO" -o "$DIST_DIR/appcast.xml" "$APPCAST_STAGE"
+rm -rf "$APPCAST_STAGE"
+grep -q "sparkle:edSignature" "$DIST_DIR/appcast.xml" \
+  || { echo "appcast.xml has no EdDSA signature; the app would refuse this update." >&2; exit 1; }
+
 echo "==> done"
-echo "    DMG:  $DMG_PATH"
+echo "    DMG:     $DMG_PATH"
+echo "    Appcast: $DIST_DIR/appcast.xml"
+echo "    Publish: script/publish_release.sh $VERSION <notes-file>"
 echo "    dSYM: $APP_DSYM (keep it to read crash logs from this exact build)."
